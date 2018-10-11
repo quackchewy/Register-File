@@ -24,7 +24,7 @@ module mux32_1_testbench();
 	initial begin
 		for (j = 0; j < 32; j++) begin
 			for (i = 0; i < 65536; i++) begin
-				sel = j; in = i; #10;
+				sel = j; in = i; #5000;
 			end
 		end
 	end
