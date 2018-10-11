@@ -27,13 +27,13 @@ module decoder5_32_testbench ();
 	initial begin
 		integer i;
 		for (i = 0; i < 32; i++) begin
-			in = i; regWrite = 1; #10;
+			in = i; regWrite = 1; #3000;
 		end
 		
 		in = 0; #50;
 		
 		for (i = 0; i < 32; i++) begin
-			in = i; regWrite = 0; #10;
+			in = i; regWrite = 0; #3000;
 		end		
 	end
 	

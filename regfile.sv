@@ -1,9 +1,9 @@
-module regfile (readData1, readData2, writeData, readReg1, readReg2, writeReg, regWriteEnable, reset, clk);
-	output logic [63:0] readData1, readData2;
-	input logic [63:0] writeData;
-	input logic [4:0] readReg1, readReg2;
-	input logic [4:0] writeReg;
-	input logic regWriteEnable, reset, clk;
+module regfile (ReadData1, ReadData2, WriteData, ReadRegister1, ReadRegister2, WriteRegister, RegWrite, clk);
+	output logic [63:0] ReadData1, ReadData2;
+	input logic [63:0] WriteData;
+	input logic [4:0] ReadRegister1, ReadRegister2;
+	input logic [4:0] WriteRegister;
+	input logic RegWrite, clk;
 
 	// Decoder chooses 1 register to write to.
 	logic [31:0] decOut;
@@ -14,14 +14,14 @@ module regfile (readData1, readData2, writeData, readReg1, readReg2, writeReg, r
 	
 	assign regOutMuxIn[31] = 64'b0;
 
-	decoder5_32 dec (.out(decOut), .in(writeReg), .regWrite(regWriteEnable));
+	decoder5_32 dec (.out(decOut), .in(WriteRegister), .regWrite(RegWrite));
 	
 	genvar i, j, m, n;
 	generate
 		// Create 31 registers: X0 to X30.
 		// TODO: make outputs go to 2 muxes.
 		for (i = 0; i < 31; i++) begin : eachReg
-			register regI (.dataIn(writeData), .dataOut(regOutMuxIn[i]), .writeEnable(decOut[i]), .reset, .clk);
+			register regI (.dataIn(WriteData), .dataOut(regOutMuxIn[i]), .writeEnable(decOut[i]), .clk);
 		end
 		
 		for (m = 0; m < 32; m++) begin : flipRows
@@ -31,8 +31,8 @@ module regfile (readData1, readData2, writeData, readReg1, readReg2, writeReg, r
 		end
 		
 		for (j = 0; j < 64; j++) begin : eachMuxPair					
-			mux32_1 mux1 (.out(readData1[j]), .in(flippedMatrix[j]), .sel(readReg1));
-			mux32_1 mux2 (.out(readData2[j]), .in(flippedMatrix[j]), .sel(readReg2));
+			mux32_1 mux1 (.out(ReadData1[j]), .in(flippedMatrix[j]), .sel(ReadRegister1));
+			mux32_1 mux2 (.out(ReadData2[j]), .in(flippedMatrix[j]), .sel(ReadRegister2));
 		end
 		
 	endgenerate
@@ -40,11 +40,11 @@ module regfile (readData1, readData2, writeData, readReg1, readReg2, writeReg, r
 endmodule 
 
 module regfile_testbench();
-	logic [63:0] readData1, readData2;
-	logic [63:0] writeData;
-	logic [4:0] readReg1, readReg2;
-	logic [4:0] writeReg;
-	logic regWriteEnable, reset, clk;
+	logic [63:0] ReadData1, ReadData2;
+	logic [63:0] WriteData;
+	logic [4:0] ReadRegister1, ReadRegister2;
+	logic [4:0] WriteRegister;
+	logic RegWrite, clk;
 	
 	parameter period = 100; 
 	
@@ -53,25 +53,25 @@ module regfile_testbench();
 		forever #(period/2) clk <= ~clk;
 	end 
 	
-	regfile dut (.readData1, .readData2, .writeData, .readReg1, .readReg2, .writeReg, .regWriteEnable, .reset, .clk);
-	
+	regfile dut (.ReadData1, .ReadData2, .WriteData, .ReadRegister1, .ReadRegister2, .WriteRegister, .RegWrite, .clk);
+		
 	initial begin
-		regWriteEnable = 0; writeReg = 30; writeData = 124; @(posedge clk);
-		readReg1 = 30; @(posedge clk);
+		RegWrite = 0; WriteRegister = 30; WriteData = 124; @(posedge clk);
+		ReadRegister1 = 30; @(posedge clk);
 		
-		regWriteEnable = 1; writeReg = 30; writeData = 124; @(posedge clk);
-		readReg1 = 30; @(posedge clk);
+		RegWrite = 1; WriteRegister = 30; WriteData = 124; @(posedge clk);
+		ReadRegister1 = 30; @(posedge clk);
 		
-		regWriteEnable = 1; writeReg = 28; writeData = 207; @(posedge clk);
-		readReg1 = 30; readReg2 = 28; @(posedge clk);
+		RegWrite = 1; WriteRegister = 28; WriteData = 207; @(posedge clk);
+		ReadRegister1 = 30; ReadRegister2 = 28; @(posedge clk);
 		
-		regWriteEnable = 1; writeReg = 0; writeData = 'b1001; @(posedge clk);
-		readReg1 = 0; readReg2 = 12; @(posedge clk);
-		readReg1 = 0; readReg2 = 30; @(posedge clk);
-		readReg1 = 31; @(posedge clk);
+		RegWrite = 1; WriteRegister = 0; WriteData = 'b1001; @(posedge clk);
+		ReadRegister1 = 0; ReadRegister2 = 12; @(posedge clk);
+		ReadRegister1 = 0; ReadRegister2 = 30; @(posedge clk);
+		ReadRegister1 = 31; @(posedge clk);
 		
-		regWriteEnable = 1; writeReg = 31; writeData = -14; @(posedge clk);
-		readReg1 = 31; @(posedge clk);		
+		RegWrite = 1; WriteRegister = 31; WriteData = -14; @(posedge clk);
+		ReadRegister1 = 31; @(posedge clk);		
 	end
 
 endmodule 
