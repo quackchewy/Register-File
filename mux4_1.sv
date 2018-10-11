@@ -19,7 +19,7 @@ module mux4_1_testbench();
 	integer i;
 	initial begin
 		for (i = 0; i < 64; i++) begin
-			{sel1, sel0, i0, i1, i2, i3} = i; #10;
+			{sel1, sel0, i0, i1, i2, i3} = i; #5000;
 		end
 	end
 endmodule 
